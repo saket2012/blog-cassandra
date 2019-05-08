@@ -33,7 +33,7 @@ def get_user_details(username):
     rows = session.execute("""SELECT * FROM users WHERE username = %s""", (username,))
     if rows:
         return rows
-    return rows
+    return False
 
 
 def encode_password(password):
