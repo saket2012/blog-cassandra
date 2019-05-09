@@ -68,11 +68,9 @@ class Authentication(Resource):
         username = request.authorization.username
         password = request.authorization.password
         passwd = users_db.get_user_details(username)
-        print(passwd)
         if passwd:
             passwd = passwd[0]
             passwd = passwd[2]
-            print(passwd)
             if sha256_crypt.verify(password, passwd):
                 response = app.response_class(response = json.dumps({"message": "OK"}, indent = 4),
                                               status = 200,

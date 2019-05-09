@@ -8,7 +8,6 @@ def create_user(username, password, display_name):
     hash_password = encode_password(password)
     session = get_session()
     session.set_keyspace(keyspace)
-
     session.execute("""INSERT INTO users (username, password, display_name) VALUES (%s, %s, %s)""", (
         username, hash_password, display_name))
 

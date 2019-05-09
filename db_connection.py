@@ -23,4 +23,13 @@ def create_tables():
         display_name TEXT,
         PRIMARY KEY (username))""")
 
-create_tables()
+    session.execute("""
+        CREATE TABLE IF NOT EXISTS articles(
+        username text,
+        text text,
+        author text,
+        title text,
+        url text,
+        post_time text,
+        last_updated_time text,
+        PRIMARY KEY (url))""")
