@@ -5,41 +5,44 @@ from db_connection import get_session
 
 keyspace = 'blog'
 
-def post_article(username, text, author, title, url):
+def post_article(data_id, username, text, title, url):
     session = get_session()
     session.set_keyspace(keyspace)
     unix = int(time.time())
+    data_type = "A"
+    print(type(data_id))
     post_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
     last_updated_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
-    session.execute("""INSERT INTO articles (username, text, author, title, url, post_time, last_updated_time)
-    VALUES (%s, %s, %s, %s, %s, %s, %s)""", (username, text, author, title, url, post_time, last_updated_time))
+    session.execute("""INSERT INTO blogdata (data_id, username, text, title, url, datatype, post_time, last_updated_time)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""", (data_id, username, text, title, url, data_type, post_time, last_updated_time))
 
 
-# def get_article_details(username, article_id):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     try:
-#         c.execute("""SELECT * FROM articles where username = ? AND article_id = ?""", (username, article_id))
-#         rows = c.fetchall()
-#         if len(rows) == 0:
-#             return False
-#         return rows
-#     except Exception as e:
-#         return e
-#
-# def get_article_by_id(article_id):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     try:
-#         c.execute("""SELECT * FROM articles where article_id = ?""", (article_id,))
-#         rows = c.fetchall()
-#         print(rows)
-#         if len(rows) == 0:
-#             return False
-#         return rows
-#     except Exception as e:
-#         return e
-#
+def get_data_id():
+    session = get_session()
+    session.set_keyspace(keyspace)
+    rows = session.execute("""SELECT MAX(data_id) AS id FROM blogdata""")
+    for row in rows:
+        id = row.id
+    return id
+
+def get_article_details(username, id):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    rows = session.execute("""SELECT * FROM blogdata where username = %s AND data_id = %s ALLOW FILTERING""",
+        (username, int(id)))
+    if rows:
+        return True
+    return False
+
+
+def get_article_by_id(id):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    rows = session.execute("""SELECT * FROM blogdata where data_id = %s ALLOW FILTERING""", (int(id),))
+    if rows:
+        return rows
+    return False
+
 #
 # def get_article_by_url(url):
 #     conn = get_db_articles()
@@ -54,29 +57,24 @@ def post_article(username, text, author, title, url):
 #         return e
 #
 #
-# def edit_article(author, text, article_id):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     unix = int(time.time())
-#     last_updated_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
-#     try:
-#         c.execute("""UPDATE articles SET text = ?, author = ?,last_updated_time = ? WHERE article_id = ?""",
-#                   (text, author, last_updated_time, article_id))
-#         conn.commit()
-#     except Exception:
-#         conn.rollback()
-#
-#
-# def delete_article(article_id):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     try:
-#         c.execute("""DELETE FROM articles WHERE article_id = ?""", (article_id,))
-#         conn.commit()
-#     except Exception:
-#         conn.rollback()
-#
-#
+def edit_article(title, text, id):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    unix = int(time.time())
+    data_type = "A"
+    last_updated_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
+    session.execute("""UPDATE blogdata SET title = %s, text = %s, last_updated_time = %s WHERE data_id = %s AND datatype = %s""",
+                  (title, text, last_updated_time, int(id), data_type))
+
+
+
+def delete_article(id):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    data_type = "A"
+    session.execute("""DELETE FROM blogdata WHERE data_id = %s AND datatype = %s""", (int(id), data_type))
+
+
 # def get_article(title):
 #     conn = get_db_articles()
 #     c = conn.cursor()
@@ -90,31 +88,23 @@ def post_article(username, text, author, title, url):
 #         return e
 #
 #
-# def get_n_articles(n):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     c.execute(
-#         """SELECT text, author, title, post_time, last_updated_time FROM articles ORDER BY \
-#         post_time desc LIMIT ?""", (n,))
-#     rows = c.fetchall()
-#     if len(rows) == 0:
-#         return False
-#     row_headers = [x[0] for x in c.description]
-#     articles = []
-#     for article in rows:
-#         articles.append(dict(zip(row_headers, article)))
-#     return articles
-#
-#
-# def get_articles_metadata(n):
-#     conn = get_db_articles()
-#     c = conn.cursor()
-#     c.execute("""SELECT article_id, text, author, title, url, post_time FROM articles ORDER BY post_time desc LIMIT ?""", (n,))
-#     rows = c.fetchall()
-#     if len(rows) == 0:
-#         return False
-#     row_headers = [x[0] for x in c.description]
-#     articles = []
-#     for article in rows:
-#         articles.append(dict(zip(row_headers, article)))
-#     return articles
+def get_n_articles(n):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    data_type = "A"
+    rows = session.execute("""SELECT text, username, title, url, post_time, last_updated_time FROM blogdata \
+        WHERE datatype = %s ORDER BY data_id DESC LIMIT %s""", (data_type, int(n)))
+    if rows:
+        return rows
+    return False
+
+
+def get_articles_metadata(n):
+    session = get_session()
+    session.set_keyspace(keyspace)
+    data_type = "A"
+    rows = session.execute("""SELECT username, title, text, url, post_time FROM blogdata \
+        WHERE datatype = %s ORDER BY data_id DESC LIMIT %s""", (data_type, int(n)))
+    if rows:
+        return rows
+    return False

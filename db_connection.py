@@ -17,19 +17,22 @@ def create_tables():
     session = get_session()
     session.set_keyspace(keyspace)
     session.execute("""
-        CREATE TABLE IF NOT EXISTS users(
+        CREATE COLUMNFAMILY IF NOT EXISTS users(
         username TEXT,
         password TEXT,
         display_name TEXT,
         PRIMARY KEY (username))""")
 
     session.execute("""
-        CREATE TABLE IF NOT EXISTS articles(
-        username text,
-        text text,
-        author text,
-        title text,
-        url text,
-        post_time text,
-        last_updated_time text,
-        PRIMARY KEY (url))""")
+        CREATE COLUMNFAMILY IF NOT EXISTS blogdata(
+        data_id INT,
+        username TEXT,
+        text TEXT,
+        title TEXT,
+        url TEXT,
+        tag TEXT,
+        comment TEXT,
+        datatype TEXT,
+        post_time TEXT,
+        last_updated_time TEXT,
+        PRIMARY KEY (datatype, data_id))""")
