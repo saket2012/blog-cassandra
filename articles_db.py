@@ -10,7 +10,6 @@ def post_article(data_id, username, text, title, url):
     session.set_keyspace(keyspace)
     unix = int(time.time())
     data_type = "A"
-    print(type(data_id))
     post_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
     last_updated_time = str(datetime.datetime.fromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S'))
     session.execute("""INSERT INTO blogdata (data_id, username, text, title, url, datatype, post_time, last_updated_time)
@@ -38,7 +37,7 @@ def get_article_details(username, id):
 def get_article_by_id(id):
     session = get_session()
     session.set_keyspace(keyspace)
-    rows = session.execute("""SELECT * FROM blogdata where data_id = %s ALLOW FILTERING""", (int(id),))
+    rows = session.execute("""SELECT * FROM blogdata where data_id = %s AND datatype = %s ALLOW FILTERING""", (int(id), 'A'))
     if rows:
         return rows
     return False

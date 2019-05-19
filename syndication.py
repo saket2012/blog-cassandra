@@ -39,7 +39,6 @@ def full_feed():
         r = r.json()
     count = len(r)
     for i in range(count):
-        print(r[i]['url'])
         comment_tags = requests.get("http://localhost/tag-url/" + str(r[i]['url']))
         if comment_tags is not None and comment_tags != '':
             comment_tags = comment_tags.json()
@@ -68,14 +67,14 @@ def full_feed():
 
 @app.route('/comment_feed')
 def comment_feed():
-    response = requests.get('http://localhost/n-comments/2/10')
+    response = requests.get('http://localhost/n-comments/1/10')
     response = response.json()
     count = len(response)
     items = []
     for i in range(count):
         items.append(Item(
-            title="Article ID"+ str(response[i]['article_id']),
-            description="Comment is "+ response[i]['comment']
+            title="Title is"+ str(response[i]['Title']),
+            description="Comment is "+ response[i]['Comment']
         ))
     feed = Feed(
         title="RSS Feed",

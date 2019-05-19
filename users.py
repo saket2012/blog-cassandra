@@ -90,6 +90,7 @@ class Authentication(Resource):
 
 api.add_resource(User, '/user')
 api.add_resource(Authentication, '/authenticate')
+db_connection.create_tables()
 
 
 if __name__ == '__main__':

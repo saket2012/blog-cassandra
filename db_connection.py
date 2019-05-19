@@ -22,7 +22,6 @@ def create_tables():
         password TEXT,
         display_name TEXT,
         PRIMARY KEY (username))""")
-
     session.execute("""
         CREATE COLUMNFAMILY IF NOT EXISTS blogdata(
         data_id INT,
